@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: devsecops-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - frontend-net
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: devsecops-backend
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    depends_on:
+      - mariadb
+    networks:
+      - frontend-net
+      - backend-net
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:11
+    container_name: devsecops-mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: devsecops-prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-net
+      - backend-net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: devsecops-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring-net
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+  backend-net:
+  monitoring-net:
+
+
+volumes:
+  db-data:
+  grafana-data:

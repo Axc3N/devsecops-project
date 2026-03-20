@@ -1,0 +1,8 @@
+env
+node_modules/
+*.log
+.terraform/
+terraform.tfstate*
+*.tfvars
+grafana-data/
+db-data/
