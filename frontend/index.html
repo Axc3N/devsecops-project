@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevSecOps - Gestion Utilisateurs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #1B2A4A;
+            color: white;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #0D9488;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0B7C72;
+        }
+        .delete-btn {
+            background: #DC2626;
+        }
+        .delete-btn:hover {
+            background: #B91C1C;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestion des Utilisateurs</h1>
+
+    <form id="userForm">
+        <input type="text" id="name" placeholder="Nom" required minlength="2">
+        <input type="email" id="email" placeholder="Email" required>
+        <button type="submit">Ajouter</button>
+    </form>
+
+    <table>
+        <thead><tr><th>ID</th><th>Nom</th><th>Email</th><th>Actions</th></tr></thead>
+        <tbody id="userTable"></tbody>
+    </table>
+
+    <script>
+        const API = '/api/users';
+
+        async function loadUsers() {
+            const res = await fetch(API);
+            const users = await res.json();
+            document.getElementById('userTable').innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td>
+                    <td><button class="delete-btn" onclick="deleteUser(${u.id})">Supprimer</button></td>
+                </tr>`).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('userForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value
+                })
+            });
+            document.getElementById('userForm').reset();
+            loadUsers();
+        };
+
+        async function deleteUser(id) {
+            await fetch(`${API}/${id}`, { method: 'DELETE' });
+            loadUsers();
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
