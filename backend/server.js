@@ -1,16 +1,21 @@
-const express = require('express'); 
+const express = require('express');
 
-const helmet = require('helmet'); 
+const helmet = require('helmet');
 
-const cors = require('cors'); 
+const cors = require('cors');
 
-const rateLimit = require('express-rate-limit'); 
+const rateLimit = require('express-rate-limit');
 
-const mariadb = require('mariadb'); 
+const mariadb = require('mariadb');
 
-const { body, param, validationResult } = require('express-validator'); 
+const { body, param, validationResult } = require('express-validator');
 
-require('dotenv').config(); 
+const client = require('prom-client');
+
+require('dotenv').config();
+
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
 
  
 
@@ -214,29 +219,44 @@ app.put('/api/users/:id', [...idValidation, ...userValidation], handleValidation
 
 // DELETE 
 
-app.delete('/api/users/:id', idValidation, handleValidation, async (req, res) => { 
+app.delete('/api/users/:id', idValidation, handleValidation, async (req, res) => {
 
-  try { 
+  let conn;
 
-    const conn = await pool.getConnection(); 
+  try {
 
-    const result = await conn.query('DELETE FROM users WHERE id = ?', [req.params.id]); 
+    conn = await pool.getConnection();
 
-    conn.release(); 
+    const result = await conn.query('DELETE FROM users WHERE id = ?', [req.params.id]);
 
-    if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' }); 
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
 
-    res.json({ message: 'User deleted' }); 
+    // Renuméroter les IDs séquentiellement
+    await conn.query('SET @count = 0');
+    await conn.query('UPDATE users SET id = (@count := @count + 1) ORDER BY id');
+    const rows = await conn.query('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM users');
+    const nextId = Number(rows[0].next_id);
+    await conn.query(`ALTER TABLE users AUTO_INCREMENT = ${nextId}`);
 
-  } catch (err) { res.status(500).json({ error: 'Internal server error' }); } 
+    res.json({ message: 'User deleted' });
+
+  } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
+
+  finally { if (conn) conn.release(); }
 
 }); 
 
  
 
-// HEALTH CHECK 
+// HEALTH CHECK
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' })); 
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+// METRICS (Prometheus)
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 
  
 

@@ -3,106 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevSecOps - Gestion Utilisateurs</title>
+    <title>DevSecOps — Gestion Utilisateurs</title>
     <style>
+        :root {
+            --navy:    #1B2A4A;
+            --teal:    #0D9488;
+            --teal-h:  #0b8278;
+            --red:     #DC2626;
+            --bg:      #f8fafc;
+            --surface: #ffffff;
+            --border:  #e2e8f0;
+            --text:    #1e293b;
+            --muted:   #64748b;
+            --dim:     #94a3b8;
+            --mono:    ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+            --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            --r:       10px;
+            --t:       0.15s ease;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--navy);
+            padding: 0 24px;
+        }
+        .header-inner {
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+        .brand-mark {
+            width: 28px;
+            height: 28px;
+            background: var(--teal);
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
         }
-        th {
-            background: #1B2A4A;
-            color: white;
+        .brand-mark svg { display: block; }
+        .brand-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.01em;
+        }
+        .brand-sep {
+            width: 1px;
+            height: 16px;
+            background: rgba(255,255,255,.2);
+        }
+        .brand-module {
+            font-size: 12px;
+            color: rgba(255,255,255,.5);
+            font-family: var(--mono);
+            letter-spacing: .04em;
+        }
+        .pulse {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--teal);
+            font-family: var(--mono);
+        }
+        .pulse-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--teal);
+            animation: blink 2s ease infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+        /* LAYOUT */
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 36px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-head {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -.02em;
+        }
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(13,148,136,.1);
+            color: var(--teal);
+            border: 1px solid rgba(13,148,136,.25);
+            padding: 1px 8px;
+            border-radius: 20px;
+            font-family: var(--mono);
+        }
+
+        /* CARD */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            animation: up .3s ease both;
+        }
+        .card:nth-child(2) { animation-delay: .07s; }
+        @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+        /* FORM */
+        .form-card { padding: 20px 24px; }
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--dim);
+            margin-bottom: 14px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .field label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
         }
         input {
-            padding: 8px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-family: var(--sans);
+            color: var(--text);
+            background: var(--surface);
+            outline: none;
+            transition: border-color var(--t), box-shadow var(--t);
+            width: 100%;
         }
-        button {
-            padding: 8px 16px;
-            background: #0D9488;
-            color: white;
+        input::placeholder { color: var(--dim); }
+        input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 9px 18px;
+            border-radius: 7px;
             border: none;
-            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--sans);
             cursor: pointer;
+            transition: all var(--t);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
         }
-        button:hover {
-            background: #0B7C72;
+        .btn-primary {
+            background: var(--teal);
+            color: #fff;
         }
-        .delete-btn {
-            background: #DC2626;
+        .btn-primary:hover {
+            background: var(--teal-h);
+            box-shadow: 0 2px 8px rgba(13,148,136,.3);
         }
-        .delete-btn:hover {
-            background: #B91C1C;
+        .btn-danger {
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+
+        /* TABLE */
+        .table-top {
+            padding: 16px 20px 0;
+            margin-bottom: 2px;
+        }
+        .table-wrapper { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+            padding: 9px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--dim);
+        }
+        td {
+            padding: 12px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background var(--t); }
+        tbody tr:hover { background: #f8fafc; }
+
+        .id-cell    { font-family: var(--mono); font-size: 12px; color: var(--teal); font-weight: 600; width: 60px; }
+        .name-cell  { font-weight: 500; color: var(--navy); }
+        .email-cell { color: var(--muted); font-size: 13px; }
+
+        /* EMPTY */
+        .empty {
+            padding: 48px 20px;
+            text-align: center;
+        }
+        .empty-icon  { font-size: 28px; margin-bottom: 10px; opacity: .3; }
+        .empty-text  { font-size: 14px; color: var(--muted); }
+        .empty-sub   { font-size: 12px; color: var(--dim); margin-top: 3px; }
+
+        /* SKELETON */
+        .skeleton {
+            height: 12px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e9eef5 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: sh 1.3s infinite;
+        }
+        @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* TOAST */
+        #toastContainer {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 999;
+        }
+        .toast {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.12);
+            animation: tin .25s ease;
+        }
+        .toast.success { background: #fff; color: var(--teal); border: 1px solid rgba(13,148,136,.3); }
+        .toast.error   { background: #fff; color: var(--red);  border: 1px solid rgba(220,38,38,.3); }
+        @keyframes tin  { from{transform:translateX(105%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes tout { from{transform:translateX(0);opacity:1} to{transform:translateX(105%);opacity:0} }
+        .toast.leaving  { animation: tout .25s ease forwards; }
+
+        /* RESPONSIVE */
+        @media (max-width: 580px) {
+            .form-row { grid-template-columns: 1fr; }
+            th:first-child, td:first-child { display: none; }
         }
     </style>
 </head>
 <body>
-    <h1>Gestion des Utilisateurs</h1>
 
-    <form id="userForm">
-        <input type="text" id="name" placeholder="Nom" required minlength="2">
-        <input type="email" id="email" placeholder="Email" required>
-        <button type="submit">Ajouter</button>
-    </form>
+<header class="header">
+    <div class="header-inner">
+        <div class="brand">
+            <div class="brand-mark">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M7 1L2 3.5V7.5C2 10.2 4.2 12.7 7 13.5C9.8 12.7 12 10.2 12 7.5V3.5L7 1Z" fill="white" opacity=".9"/>
+                </svg>
+            </div>
+            <span class="brand-name">DevSecOps</span>
+            <div class="brand-sep"></div>
+            <span class="brand-module">users</span>
+        </div>
+        <div class="pulse">
+            <div class="pulse-dot"></div>
+            online
+        </div>
+    </div>
+</header>
 
-    <table>
-        <thead><tr><th>ID</th><th>Nom</th><th>Email</th><th>Actions</th></tr></thead>
-        <tbody id="userTable"></tbody>
-    </table>
+<main class="main">
+    <div class="page-head">
+        <h1 class="page-title">Utilisateurs</h1>
+        <span class="badge" id="countBadge">0</span>
+    </div>
 
-    <script>
-        const API = '/api/users';
+    <div class="card form-card">
+        <div class="section-label">Nouvel utilisateur</div>
+        <form id="userForm">
+            <div class="form-row">
+                <div class="field">
+                    <label for="name">Nom</label>
+                    <input type="text" id="name" placeholder="Jean Dupont" required minlength="2">
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="jean@exemple.fr" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </div>
+        </form>
+    </div>
 
-        async function loadUsers() {
-            const res = await fetch(API);
-            const users = await res.json();
-            document.getElementById('userTable').innerHTML = users.map(u => `
-                <tr>
-                    <td>${u.id}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td>
-                    <td><button class="delete-btn" onclick="deleteUser(${u.id})">Supprimer</button></td>
-                </tr>`).join('');
+    <div class="card">
+        <div class="table-top">
+            <div class="section-label">Liste des utilisateurs</div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Nom</th><th>Email</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="toastContainer"></div>
+
+<script>
+    const API = '/api/users';
+
+    function showToast(msg, type = 'success') {
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span>${msg}`;
+        document.getElementById('toastContainer').appendChild(t);
+        setTimeout(() => { t.classList.add('leaving'); setTimeout(() => t.remove(), 250); }, 3000);
+    }
+
+    function showLoading() {
+        document.getElementById('userTable').innerHTML = Array.from({length: 3}, () => `
+            <tr>
+                <td><div class="skeleton" style="width:24px"></div></td>
+                <td><div class="skeleton" style="width:100px"></div></td>
+                <td><div class="skeleton" style="width:160px"></div></td>
+                <td><div class="skeleton" style="width:64px"></div></td>
+            </tr>`).join('');
+    }
+
+    async function loadUsers() {
+        showLoading();
+        const res = await fetch(API);
+        const users = await res.json();
+        document.getElementById('countBadge').textContent = users.length;
+        if (users.length === 0) {
+            document.getElementById('userTable').innerHTML = `
+                <tr><td colspan="4">
+                    <div class="empty">
+                        <div class="empty-icon">👤</div>
+                        <div class="empty-text">Aucun utilisateur</div>
+                        <div class="empty-sub">Ajoutez-en un via le formulaire ci-dessus</div>
+                    </div>
+                </td></tr>`;
+            return;
         }
+        document.getElementById('userTable').innerHTML = users.map(u => `
+            <tr>
+                <td class="id-cell">#${u.id}</td>
+                <td class="name-cell">${escapeHtml(u.name)}</td>
+                <td class="email-cell">${escapeHtml(u.email)}</td>
+                <td><button class="btn btn-danger" onclick="deleteUser(${u.id})">Supprimer</button></td>
+            </tr>`).join('');
+    }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    document.getElementById('userForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value
+            })
+        });
+        if (res.ok) {
+            showToast('Utilisateur ajouté');
+        } else {
+            const err = await res.json();
+            showToast(err.error || "Erreur lors de l'ajout", 'error');
         }
-
-        document.getElementById('userForm').onsubmit = async (e) => {
-            e.preventDefault();
-            await fetch(API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value
-                })
-            });
-            document.getElementById('userForm').reset();
-            loadUsers();
-        };
-
-        async function deleteUser(id) {
-            await fetch(`${API}/${id}`, { method: 'DELETE' });
-            loadUsers();
-        }
-
+        document.getElementById('userForm').reset();
         loadUsers();
-    </script>
+    };
+
+    async function deleteUser(id) {
+        const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+        if (res.ok) showToast('Utilisateur supprimé');
+        else showToast('Erreur lors de la suppression', 'error');
+        loadUsers();
+    }
+
+    loadUsers();
+</script>
 </body>
 </html>
